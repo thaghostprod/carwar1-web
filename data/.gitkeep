@@ -1,0 +1,3 @@
+# Questa cartella contiene i dati condivisi salvati dal backend (server.js).
+# I file annunci.json e config.json vengono creati automaticamente al primo avvio
+# a partire dal seed in js/data.js e non sono versionati.

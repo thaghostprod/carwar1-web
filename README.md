@@ -23,17 +23,61 @@ Sito vetrina per **annunci auto** che importi tu (JSON o CSV) o inserisci a mano
 - **Export 1-click**: JSON, CSV e `data.js` (pronto da sostituire in `js/data.js`)
 - **Dati concessionaria** configurabili (nome, telefono, WhatsApp, email, indirizzo)
 - **Tabella inventario** con azioni rapide Vedi / Modifica / Elimina
-- Salva i dati in questo browser (`localStorage`)
+- Salva i dati in questo browser (`localStorage`) oppure, con il backend attivo, sul server (condivisi con tutti i visitatori)
 
 ## Avvio
 
+### Modalità semplice (solo il tuo browser)
+
 Apri `index.html` nel browser, oppure da questa cartella:
 
-```powershell
+```bash
 py -m http.server 8080
 ```
 
-Poi vai su http://localhost:8080
+Gli annunci restano in questo browser (`localStorage`).
+
+### Modalità condivisa (consigliata) — backend Node
+
+Serve Node.js. **Nessuna dipendenza da installare.**
+
+```bash
+node server.js
+```
+
+Poi apri http://localhost:8080: gli annunci sono salvati sul server in `data/annunci.json`
+e visibili a **tutti** i visitatori. Il badge in alto mostra 🌐 quando sei connesso al server.
+
+Variabili d'ambiente:
+
+| Variabile | Descrizione | Default |
+|---|---|---|
+| `PORT` | porta HTTP | `8080` |
+| `HOST` | interfaccia di ascolto | `0.0.0.0` |
+| `CAR_WARS_TOKEN` | password richiesta per modificare gli annunci | *(vuota = scritture aperte)* |
+
+Esempio protetto da password:
+
+```bash
+PORT=8080 CAR_WARS_TOKEN=la-mia-password node server.js
+```
+
+Con `CAR_WARS_TOKEN` impostato, per salvare gli annunci inserisci la stessa password in
+**Gestione & Import → Server & accesso**.
+
+## API del backend
+
+| Metodo | Percorso | Descrizione |
+|---|---|---|
+| `GET` | `/api/health` | stato del servizio |
+| `GET` | `/api/listings` | elenco annunci |
+| `PUT` | `/api/listings` | sostituisce l'elenco (richiede password) |
+| `POST` | `/api/listings` | inserisce/aggiorna un annuncio (richiede password) |
+| `DELETE` | `/api/listings/:id` | elimina un annuncio (richiede password) |
+| `GET` | `/api/config` | dati concessionaria |
+| `PUT` | `/api/config` | salva dati concessionaria (richiede password) |
+
+La password va inviata nell'header `x-admin-token`.
 
 ## Import / Export
 
@@ -43,18 +87,19 @@ Campi: `id,title,brand,model,year,price,km,fuel,transmission,city,image,source,d
 
 Il parser CSV gestisce campi tra virgolette con virgole e doppi apici interni.
 
-### Pubblicare gli annunci per tutti i visitatori
+### Alternativa senza backend
 
-I dati inseriti restano nel tuo browser. Per renderli visibili a tutti, dalla sezione
-*Gestione & Import* scarica **data.js** e sostituisci il file `js/data.js` del sito.
+Se non vuoi avviare il server, dalla sezione *Gestione & Import* scarica **data.js**
+e sostituisci il file `js/data.js` del sito: il catalogo diventa permanente per tutti.
 
 Usa solo annunci di cui hai i diritti (auto tue, concessionaria, feed API autorizzato). Non copiare i contenuti di portali terzi.
 
 ## Test
 
-Le funzioni di parsing/export sono testabili con Node:
-
 ```bash
+node --check server.js
 node --check js/app.js
+node --check js/store.js
 ```
+
 

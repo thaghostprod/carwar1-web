@@ -1,6 +1,4 @@
-const STORAGE_KEY = "car-wars-listings";
 const FAVORITES_KEY = "car-wars-favorites";
-const CONFIG_KEY = "car-wars-config";
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=80";
 
@@ -46,22 +44,29 @@ function normalizeCar(raw, index = 0) {
   };
 }
 
-function loadListings() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed.map(normalizeCar);
-    }
-  } catch {
-    /* ignore broken storage */
-  }
+function seedListings() {
   return structuredClone(window.CAR_WARS_SEED || []).map(normalizeCar);
+}
+
+function loadListings() {
+  const stored = window.CarWarsStore.getListings();
+  if (Array.isArray(stored)) return stored.map(normalizeCar);
+  return seedListings();
 }
 
 function saveListings(listings) {
   const normalized = listings.map(normalizeCar);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+  window.CarWarsStore.saveListings(normalized).then((error) => {
+    if (!error) return;
+    if (error.type === "auth") {
+      showGlobalNotice(
+        "Per salvare online serve la password amministratore: inseriscila in Gestione &amp; Import.",
+        "err"
+      );
+    } else {
+      showGlobalNotice("Salvataggio online non riuscito: i dati restano salvati in questo browser.", "err");
+    }
+  });
   return normalized;
 }
 
@@ -99,18 +104,45 @@ function loadConfig() {
     email: "info@carwars.local",
     address: "Milano"
   };
-  try {
-    const raw = localStorage.getItem(CONFIG_KEY);
-    if (raw) return { ...defaults, ...JSON.parse(raw) };
-  } catch {
-    /* ignore */
-  }
+  const stored = window.CarWarsStore.getConfig();
+  if (stored && typeof stored === "object") return { ...defaults, ...stored };
   return { ...defaults };
 }
 
 function saveConfig(cfg) {
-  localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+  window.CarWarsStore.saveConfig(cfg);
   syncHeaderBrand();
+}
+
+function showGlobalNotice(message, kind) {
+  const box = document.getElementById("globalNotice");
+  if (!box) return;
+  box.innerHTML = `<div class="notice ${kind || ""}">${message}</div>`;
+  if (kind === "ok") {
+    window.setTimeout(() => {
+      box.innerHTML = "";
+    }, 5000);
+  }
+}
+
+function updateServerBadge() {
+  const store = window.CarWarsStore;
+  const online = store.state.online;
+  const badge = document.getElementById("serverBadge");
+  if (badge) {
+    badge.textContent = online ? "🌐 Server condiviso" : "💾 Solo questo browser";
+    badge.className = `server-badge ${online ? "online" : "offline"}`;
+    badge.title = online
+      ? "Gli annunci sono salvati sul server e visibili a tutti i visitatori."
+      : "Backend non attivo: gli annunci restano in questo browser. Avvia server.js per condividerli.";
+  }
+  const status = document.getElementById("serverPanelStatus");
+  if (status) {
+    const auth = store.state.authRequired ? " Le modifiche richiedono la password." : "";
+    status.textContent = online
+      ? `Backend attivo: gli annunci sono condivisi con tutti i visitatori.${auth}`
+      : "Backend non attivo: gli annunci restano solo in questo browser. Avvia server.js per condividerli.";
+  }
 }
 
 function syncHeaderBrand() {
@@ -742,6 +774,16 @@ function renderImport() {
           <button type="submit">Salva dati contatto</button>
         </form>
       </div>
+
+      <div class="panel">
+        <h2>Server &amp; accesso</h2>
+        <p class="meta" id="serverPanelStatus"></p>
+        <form id="tokenForm" class="stack-form">
+          <input id="adminToken" type="password" placeholder="Password amministratore" value="${escapeHtml(window.CarWarsStore.getToken())}" />
+          <button type="submit">Salva password</button>
+        </form>
+        <p class="notice">Avvia il backend con <code>node server.js</code> per condividere gli annunci con tutti i visitatori. Se l'hai avviato con <code>CAR_WARS_TOKEN</code>, inserisci qui la stessa password.</p>
+      </div>
     </div>
 
     <div class="panel">
@@ -789,9 +831,14 @@ function bindImportEvents() {
   });
 
   document.getElementById("resetBtn").addEventListener("click", () => {
-    localStorage.removeItem(STORAGE_KEY);
-    flash("Demo ripristinata.", "ok");
-    renderImport();
+    window.CarWarsStore.resetListings(seedListings()).then((error) => {
+      if (error && error.type === "auth") {
+        flash("Serve la password amministratore per ripristinare il catalogo sul server.", "err");
+      } else {
+        flash("Demo ripristinata.", "ok");
+      }
+      renderImport();
+    });
   });
 
   document.getElementById("exportJsonBtn").addEventListener("click", () => {
@@ -817,6 +864,13 @@ function bindImportEvents() {
     flash("Dati concessionaria salvati.", "ok");
   });
 
+  document.getElementById("tokenForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    window.CarWarsStore.setToken(document.getElementById("adminToken").value.trim());
+    flash("Password salvata. Ora puoi salvare gli annunci sul server.", "ok");
+  });
+
+  updateServerBadge();
   renderInventoryTable();
 }
 
@@ -971,3 +1025,10 @@ function renderForm(id) {
 
 window.addEventListener("hashchange", route);
 route();
+
+window.CarWarsStore.onChange(updateServerBadge);
+
+window.CarWarsStore.init().then((result) => {
+  updateServerBadge();
+  if (result.online && result.changed) route();
+});

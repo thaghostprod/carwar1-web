@@ -616,6 +616,63 @@ nav a.active {
   }
 }
 
+/* ===== Stato server & notifiche globali ===== */
+
+.topbar {
+  flex-wrap: wrap;
+}
+
+.server-badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid var(--line);
+  white-space: nowrap;
+  cursor: help;
+}
+
+.server-badge.online {
+  color: var(--ok);
+  border-color: var(--ok);
+  background: rgba(61, 214, 140, 0.08);
+}
+
+.server-badge.offline {
+  color: var(--muted);
+  background: #1b2230;
+}
+
+.global-notice {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.global-notice:empty {
+  display: none;
+}
+
+.global-notice .notice {
+  margin: 16px 0 0;
+}
+
+code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #223046;
+  color: var(--accent);
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .server-badge {
+    order: 3;
+    width: 100%;
+    text-align: center;
+  }
+}
+
   position: sticky;
   top: 92px;
   display: grid;
