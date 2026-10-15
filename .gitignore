@@ -4,3 +4,6 @@ Thumbs.db
 .env
 .env.*
 node_modules/
+data/annunci.json
+data/config.json
+data/*.tmp
