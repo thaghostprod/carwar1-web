@@ -27,6 +27,16 @@ Sito vetrina per **annunci auto** che importi tu (JSON o CSV) o inserisci a mano
 
 ## Avvio
 
+### Avvio rapido (consigliato)
+
+Serve [Node.js](https://nodejs.org) (versione LTS). Poi, dalla cartella del progetto:
+
+- **Windows**: fai doppio clic su `avvia.bat`
+- **Linux / macOS**: `./avvia.sh`
+
+Si apre il browser su http://localhost:8080 e gli annunci sono condivisi con tutti.
+Per fermare il server: `CTRL + C`.
+
 ### Modalità semplice (solo il tuo browser)
 
 Apri `index.html` nel browser, oppure da questa cartella:
