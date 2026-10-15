@@ -1,3 +1,5 @@
 id,title,brand,model,year,price,km,fuel,transmission,city,image,source,description
-imp-101,Peugeot 208 PureTech Allure,Peugeot,208,2021,16400,31000,Benzina,Manuale,Firenze,https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1200&q=80,Tuo inventario,Esempio di riga CSV da sostituire con i tuoi annunci.
-imp-102,Audi A4 2.0 TDI Business,Audi,A4,2018,21900,98000,Diesel,Automatico,Verona,https://images.unsplash.com/photo-1606664515524-ed2f786a0fe6?auto=format&fit=crop&w=1200&q=80,Tuo inventario,Secondo esempio. Non copiare schede da AutoScout o Subito.
+imp-101,Peugeot 208 PureTech Allure,Peugeot,208,2021,16400,31000,Benzina,Manuale,Firenze,https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1200&q=80,Tuo inventario,"Esempio di riga CSV con virgole nella descrizione, sensori di parcheggio, cerchi in lega da 16 pollici."
+imp-102,Audi A4 2.0 TDI Business,Audi,A4,2018,21900,98000,Diesel,Automatico,Verona,https://images.unsplash.com/photo-1606664515524-ed2f786a0fe6?auto=format&fit=crop&w=1200&q=80,Tuo inventario,"Secondo esempio completo, tagliandi certificati e cambio automatico S-Tronic."
+imp-103,Tesla Model 3 Long Range AWD,Tesla,Model 3,2022,34500,28000,Elettrica,Automatico,Milano,https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=1200&q=80,Tuo inventario,"Autonomia elevata, Autopilot base, pompa di calore e doppio motore Dual Motor."
+
